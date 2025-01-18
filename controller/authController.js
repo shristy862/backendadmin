@@ -98,7 +98,7 @@ export const verifyOTP = async (req, res) => {
       name: tempUser.name,
       email: tempUser.email,
       phone: tempUser.phone,
-      role: 'user',  // Default role for signup
+      role: 'user',  
       status: 'active',  // Set status as 'active'
     });
 
