@@ -4,40 +4,35 @@ import { generateRandomOTP, sendOTP } from '../utils/otpService.js';
 import Order from '../model/orderModel.js'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+
+
 // Signup route
 export const signup = async (req, res) => {
   const { name, role, phone, email } = req.body;
 
-  // Step 1: Log the incoming phone number for debugging
-  console.log('Received phone number:', phone);
 
-  // Step 2: Validate that the phone number is not empty or null
+  // Validate that the phone number is not empty or null
   if (!phone || !phone.trim()) {
-    console.log('Phone number is missing or invalid');
     return res.status(400).json({ message: 'Phone number is required' });
   }
 
-  // Step 3: Check if the phone number already exists in the database (TemporaryUser collection)
   try {
     const existingUser = await TemporaryUser.findOne({ phone });
     if (existingUser) {
-      console.log('Phone number already exists in TemporaryUser collection:', phone);
       return res.status(400).json({ message: 'Phone number already exists' });
     }
 
-    // Step 4: Generate OTP
+    //Generate OTP
     const otp = generateRandomOTP();
-    console.log('Generated OTP:', otp);
     const otpExpiry = Date.now() + 5 * 60 * 1000;
 
-    // Step 5: Send OTP via SMS (using AWS SNS or other service)
+    //Send OTP via SMS (using AWS SNS or other service)
     const otpSent = await sendOTP(phone, otp);
     if (!otpSent.success) {
-      console.log('Failed to send OTP');
       return res.status(500).json({ message: 'Failed to send OTP' });
     }
 
-    // Step 6: Save the user data in the TemporaryUser collection
+    //Save the user data in the TemporaryUser collection
     const newUser = new TemporaryUser({
       name,
       role,
@@ -48,12 +43,10 @@ export const signup = async (req, res) => {
     });
 
     await newUser.save();
-    console.log('User saved to TemporaryUser collection:', newUser);
 
     // Step 7: Respond with success message
     return res.status(200).json({ message: 'OTP sent successfully!' });
   } catch (error) {
-    console.error('Error during signup process:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -102,18 +95,15 @@ export const verifyOTP = async (req, res) => {
 
     return res.status(200).json({ message: 'User verified and created successfully!' });
   } catch (error) {
-    console.error('Error during verification process:', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 // login 
 export const login = async (req, res) => {
   const { phone, password } = req.body;
 
-  console.log('Received login request:', req.body); // Log incoming request body
-
   if (!phone || !password) {
-    console.log('Missing phone or password');
     return res.status(400).json({ message: 'Phone and password are required' });
   }
 
@@ -125,10 +115,7 @@ export const login = async (req, res) => {
       console.log(`User not found with phone: ${phone}`);
       return res.status(404).json({ message: 'User not found' });
     }
-
-    console.log('User found in DB:', user); // Log user data from DB
-
-    // 3. Verify the password
+    // Verify the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -146,10 +133,8 @@ export const login = async (req, res) => {
         role: user.role,
       },
       process.env.JWT_SECRET, // Replace with your secret key
-      { expiresIn: '1h' } // Token expires in 1 hour
+      { expiresIn: '1h' } 
     );
-
-    console.log('JWT token generated:', token); // Log the generated token
 
     // Respond with the token and user data
     res.status(200).json({
@@ -175,7 +160,6 @@ export const getDashboardData = async (req, res) => {
     const role = req.user.role;
 
     if (role === 'admin') {
-      // Admin dashboard data
 
       // Get the current date and time
       const currentDate = new Date();
@@ -205,8 +189,7 @@ export const getDashboardData = async (req, res) => {
         {
           $match: {
             'orders.createdAt': {
-              $gte: new Date(currentDate - 24 * 60 * 60 * 1000), // Filter orders placed within the last 24 hours
-            },
+              $gte: new Date(currentDate - 24 * 60 * 60 * 1000),},
           },
         },
         {
@@ -233,7 +216,7 @@ export const getDashboardData = async (req, res) => {
       // Fetch products along with their order IDs and statuses
       const productStatuses = await Order.aggregate([
         {
-          $unwind: '$items', // Unwind the items array in each order
+          $unwind: '$items', 
         },
         {
           $lookup: {
