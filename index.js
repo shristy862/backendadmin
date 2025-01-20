@@ -1,6 +1,6 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import authRoutes from './route/authroutes.js';
 import productRoutes from './route/productRoutes.js'; 
 import orderRoutes from './route/orderRoutes.js';
