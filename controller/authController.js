@@ -5,7 +5,6 @@ import Order from '../model/orderModel.js'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-
 // Signup route
 export const signup = async (req, res) => {
   const { name, role, phone, email } = req.body;
